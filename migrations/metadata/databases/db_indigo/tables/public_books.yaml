@@ -1,3 +1,7 @@
 table:
   schema: public
   name: books
+object_relationships:
+  - name: author
+    using:
+      foreign_key_constraint_on: authorId
