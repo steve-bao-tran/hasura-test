@@ -1,31 +1,62 @@
-version: '3.6'
+version: "3.7"
+
+x-refs:
+  common_config: &common_config
+    restart: always
+    env_file:
+    - .env
+
 services:
-  postgres:
-    image: postgres:12
-    restart: always
-    volumes:
-    - db_data:/var/lib/postgresql/data
+  # postgres:
+  #   image: postgres:12
+  #   restart: always
+  #   volumes:
+  #   - db_data:/var/lib/postgresql/data
+  #   environment:
+  #     POSTGRES_PASSWORD: 123456
+  # graphql-engine:
+  #   <<: *common_config
+  #   image: hasura/graphql-engine:v2.8.3
+  #   ports:
+  #   - "8080:8080"
+  #   # depends_on:
+  #   # - "postgres"
+  #   restart: always
+  #   environment:
+  #     ## postgres database to store Hasura metadata
+  #     # HASURA_GRAPHQL_METADATA_DATABASE_URL: postgres://indigo:indigo2user@indigo-staging-db-instance.cnwia577k4re.ap-southeast-1.rds.amazonaws.com:5432/indigo
+  #     # HASURA_GRAPHQL_METADATA_DATABASE_URL: postgres://${POSTGRES_USER}:${POSTGRES_PASSWORD}@${POSTGRES_HOST}:${POSTGRES_PORT}/${POSTGRES_DB}
+  #     HASURA_GRAPHQL_METADATA_DATABASE_URL: postgres://indigo:indigo2user@$localhost:5432/indigo
+  #     ## this env var can be used to add the above postgres database to Hasura as a data source. this can be removed/updated based on your needs
+  #     PG_DATABASE_URL: postgres://indigo:indigo2user@$localhost:5432/indigo
+  #     ## enable the console served by server
+  #     HASURA_GRAPHQL_ENABLE_CONSOLE: "true" # set to "false" to disable console
+  #     ## enable debugging mode. It is recommended to disable this in production
+  #     HASURA_GRAPHQL_DEV_MODE: "true"
+  #     HASURA_GRAPHQL_ENABLED_LOG_TYPES: startup, http-log, webhook-log, websocket-log, query-log
+  #     ## uncomment next line to set an admin secret
+  #     # HASURA_GRAPHQL_ADMIN_SECRET: myadminsecretkey
+
+  data:
+    <<: *common_config
+    image: hasura/graphql-engine:v1.3.0.cli-migrations
+    # volumes:
+    #   - ./services/data/migrations:/migrations
+    # ports:
+    #   - "9080:8080"
+    network_mode: host
+    # depends_on:
+    #   - events
     environment:
-      POSTGRES_PASSWORD: 123456
-  graphql-engine:
-    image: hasura/graphql-engine:v2.8.3
-    ports:
-    - "8080:8080"
-    depends_on:
-    - "postgres"
-    restart: always
-    environment:
-      ## postgres database to store Hasura metadata
-      HASURA_GRAPHQL_METADATA_DATABASE_URL: postgres://postgres:123456@postgres:5432/postgres
-      ## this env var can be used to add the above postgres database to Hasura as a data source. this can be removed/updated based on your needs
-      PG_DATABASE_URL: postgres://postgres:123456@postgres:5432/postgres
-      ## enable the console served by server
-      HASURA_GRAPHQL_ENABLE_CONSOLE: "true" # set to "false" to disable console
-      ## enable debugging mode. It is recommended to disable this in production
-      HASURA_GRAPHQL_DEV_MODE: "true"
-      HASURA_GRAPHQL_ENABLED_LOG_TYPES: startup, http-log, webhook-log, websocket-log, query-log
-      ## uncomment next line to set an admin secret
-      # HASURA_GRAPHQL_ADMIN_SECRET: myadminsecretkey
-volumes:
-  db_data:
+      HASURA_GRAPHQL_DATABASE_URL: postgres://${POSTGRES_USER}:${POSTGRES_PASSWORD}@${POSTGRES_HOST}:${POSTGRES_PORT}/${POSTGRES_DB}
+      HASURA_GRAPHQL_ENABLE_CONSOLE: "true"
+      # HASURA_GRAPHQL_MIGRATIONS_DIR: "/migrations"
+      # REMOTE_SCHEMA_URL: http://events:9001/graphql
+      # COMMUNICATION_SERVICE_URL: http://communication:9002/graphql
+      # HASURA_GRAPHQL_AUTH_HOOK: http://events:9001/auth/verify
+      # COMMUNICATION_URL: http://communication:9002
+      PORT: 8080
+
+# volumes:
+#   db_data:
 
